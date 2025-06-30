@@ -6,14 +6,14 @@ import { motion } from "framer-motion";
 
 export function CallToAction() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-3xl p-8 sm:p-12 lg:p-16"
+          className="relative overflow-hidden bg-gradient-to-r from-yellow-400 to-yellow-300 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16"
         >
           {/* Background Decorations */}
           <div className="absolute inset-0 overflow-hidden">
@@ -37,7 +37,7 @@ export function CallToAction() {
                 </div>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-blue-950 leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-blue-950 leading-tight">
                 Are you a brand?{" "}
                 <br className="hidden sm:block" />
                 <span className="relative">
@@ -53,7 +53,7 @@ export function CallToAction() {
                 by top-tier events.
               </h2>
 
-              <p className="text-xl sm:text-2xl text-blue-800 max-w-3xl mx-auto font-medium">
+              <p className="text-lg sm:text-xl md:text-2xl text-blue-800 max-w-3xl mx-auto font-medium px-2">
                 Join 1000+ verified brands getting authentic exposure through events that actually match your target audience. No spam, no fake followers, just real connections.
               </p>
 
@@ -64,15 +64,15 @@ export function CallToAction() {
                 >
                   <Button
                     size="lg"
-                    className="bg-blue-950 text-white hover:bg-blue-900 font-semibold text-lg px-8 py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="bg-blue-950 text-white hover:bg-blue-900 font-semibold text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
                   >
                     Join as a Brand
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </motion.div>
               </div>
 
-              <div className="pt-4 flex flex-wrap justify-center items-center gap-8 text-blue-800 text-sm font-medium">
+              <div className="pt-4 flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-blue-800 text-xs sm:text-sm font-medium">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   <span>Free to browse events</span>

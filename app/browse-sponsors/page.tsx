@@ -1,23 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { SearchFilters } from "@/components/browse-sponsors/search-filters";
 import { SponsorGrid } from "@/components/browse-sponsors/sponsor-grid";
 import { ViewToggle } from "@/components/browse-sponsors/view-toggle";
 import { motion } from "framer-motion";
+import { getAllBrands } from "@/lib/firebase/brands/brandModel";
 
 export default function BrowseSponsorsPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [totalBrands, setTotalBrands] = useState<number>(0);
   const [filters, setFilters] = useState({
-    category: "all",
+    categories: [] as string[],
     dealType: "all",
     location: "all",
     verifiedOnly: false,
     contactUnlock: "all",
   });
+
+  // Fetch total brand count
+  useEffect(() => {
+    const fetchBrandCount = async () => {
+      try {
+        const brands = await getAllBrands();
+        setTotalBrands(brands.length);
+      } catch (error) {
+        console.error("Error fetching brand count:", error);
+      }
+    };
+
+    fetchBrandCount();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-purple-900">
@@ -65,8 +81,10 @@ export default function BrowseSponsorsPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-8">
               <div className="text-white">
-                <span className="text-2xl font-bold">1,247</span>
-                <span className="text-blue-200 ml-2">verified sponsors found</span>
+                <span className="text-2xl font-bold">{totalBrands.toLocaleString()}</span>
+                <span className="text-blue-200 ml-2">
+                  {totalBrands === 1 ? "sponsor found" : "sponsors found"}
+                </span>
               </div>
               <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
             </div>

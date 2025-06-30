@@ -1,26 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
-import { SponsorCard } from "@/components/browse-sponsors/sponsor-card";
+import { useState, useEffect, useMemo } from "react";
+import { PublicBrandCard } from "@/components/browse-sponsors/public-brand-card";
 import { motion } from "framer-motion";
-
-interface Sponsor {
-  id: string;
-  name: string;
-  logo: string;
-  location: string;
-  category: string;
-  dealTypes: string[];
-  rating: number;
-  reviewCount: number;
-  verified: boolean;
-  contactUnlock: "free" | "paid";
-  description: string;
-  tags: string[];
-}
+import { Brand } from "@/lib/firebase/brands/brandSchema";
+import { getAllBrands } from "@/lib/firebase/brands/brandModel";
 
 interface Filters {
-  category: string;
+  categories: string[];
   dealType: string;
   location: string;
   verifiedOnly: boolean;
@@ -33,177 +20,113 @@ interface SponsorGridProps {
   filters: Filters;
 }
 
-// Mock sponsor data
-const mockSponsors: Sponsor[] = [
-  {
-    id: "1",
-    name: "TechFlow",
-    logo: "🚀",
-    location: "Austin, TX",
-    category: "Technology",
-    dealTypes: ["cash", "product"],
-    rating: 4.9,
-    reviewCount: 127,
-    verified: true,
-    contactUnlock: "paid",
-    description: "Leading tech startup specializing in AI-powered solutions for event management.",
-    tags: ["AI", "SaaS", "Innovation"],
-  },
-  {
-    id: "2",
-    name: "GreenLife",
-    logo: "🌱",
-    location: "San Francisco, CA",
-    category: "Health & Fitness",
-    dealTypes: ["product"],
-    rating: 4.7,
-    reviewCount: 89,
-    verified: true,
-    contactUnlock: "free",
-    description: "Sustainable wellness brand promoting healthy lifestyle through organic products.",
-    tags: ["Organic", "Wellness", "Sustainable"],
-  },
-  {
-    id: "3",
-    name: "StyleVibe",
-    logo: "👗",
-    location: "New York, NY",
-    category: "Fashion",
-    dealTypes: ["cash", "product"],
-    rating: 4.8,
-    reviewCount: 203,
-    verified: true,
-    contactUnlock: "paid",
-    description: "Trendy fashion brand targeting Gen-Z with sustainable and affordable clothing.",
-    tags: ["Sustainable", "Gen-Z", "Trendy"],
-  },
-  {
-    id: "4",
-    name: "FoodieHub",
-    logo: "🍕",
-    location: "Chicago, IL",
-    category: "Food & Beverage",
-    dealTypes: ["product"],
-    rating: 4.6,
-    reviewCount: 156,
-    verified: true,
-    contactUnlock: "free",
-    description: "Gourmet food delivery service connecting local restaurants with food lovers.",
-    tags: ["Local", "Gourmet", "Delivery"],
-  },
-  {
-    id: "5",
-    name: "GameCraft",
-    logo: "🎮",
-    location: "Seattle, WA",
-    category: "Gaming",
-    dealTypes: ["cash"],
-    rating: 4.9,
-    reviewCount: 342,
-    verified: true,
-    contactUnlock: "paid",
-    description: "Indie game studio creating immersive gaming experiences for mobile and PC.",
-    tags: ["Indie", "Mobile", "PC"],
-  },
-  {
-    id: "6",
-    name: "BeautyBliss",
-    logo: "💄",
-    location: "Los Angeles, CA",
-    category: "Beauty",
-    dealTypes: ["product"],
-    rating: 4.5,
-    reviewCount: 98,
-    verified: false,
-    contactUnlock: "free",
-    description: "Cruelty-free beauty brand with products made from natural ingredients.",
-    tags: ["Cruelty-free", "Natural", "Vegan"],
-  },
-  {
-    id: "7",
-    name: "TravelSphere",
-    logo: "✈️",
-    location: "Miami, FL",
-    category: "Travel",
-    dealTypes: ["cash", "product"],
-    rating: 4.7,
-    reviewCount: 234,
-    verified: true,
-    contactUnlock: "paid",
-    description: "Premium travel booking platform offering curated experiences worldwide.",
-    tags: ["Premium", "Curated", "Worldwide"],
-  },
-  {
-    id: "8",
-    name: "EduTech Pro",
-    logo: "📚",
-    location: "Denver, CO",
-    category: "Education",
-    dealTypes: ["cash"],
-    rating: 4.8,
-    reviewCount: 167,
-    verified: true,
-    contactUnlock: "free",
-    description: "Educational technology company revolutionizing online learning experiences.",
-    tags: ["EdTech", "Online", "Innovation"],
-  },
-];
-
 export function SponsorGrid({ viewMode, searchQuery, filters }: SponsorGridProps) {
-  const filteredSponsors = useMemo(() => {
-    let filtered = mockSponsors;
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch brands from Firebase
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const fetchedBrands = await getAllBrands();
+        setBrands(fetchedBrands);
+      } catch (err) {
+        console.error("Error fetching brands:", err);
+        setError("Failed to load sponsors. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
+  const filteredBrands = useMemo(() => {
+    let filtered = brands;
 
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(
-        (sponsor) =>
-          sponsor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          sponsor.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          sponsor.tags.some((tag) =>
-            tag.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+        (brand) =>
+          brand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          brand.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          brand.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     // Category filter
-    if (filters.category && filters.category !== "all") {
-      filtered = filtered.filter((sponsor) => sponsor.category === filters.category);
+    if (filters.categories && filters.categories.length > 0) {
+      filtered = filtered.filter((brand) => filters.categories.includes(brand.category));
     }
 
     // Deal type filter
     if (filters.dealType && filters.dealType !== "all") {
       if (filters.dealType === "both") {
-        filtered = filtered.filter((sponsor) => 
-          sponsor.dealTypes.includes("cash") && sponsor.dealTypes.includes("product")
-        );
+        filtered = filtered.filter((brand) => brand.dealType === "both");
       } else {
-        filtered = filtered.filter((sponsor) => 
-          sponsor.dealTypes.includes(filters.dealType)
-        );
+        // Map the filter values to match our schema
+        const dealTypeMapping: { [key: string]: Brand['dealType'] } = {
+          "cash": "money",
+          "product": "product",
+          "money": "money"
+        };
+        const mappedDealType = dealTypeMapping[filters.dealType];
+        if (mappedDealType) {
+          filtered = filtered.filter((brand) => 
+            brand.dealType === mappedDealType || brand.dealType === "both"
+          );
+        }
       }
     }
 
     // Location filter
     if (filters.location && filters.location !== "all") {
-      filtered = filtered.filter((sponsor) => sponsor.location === filters.location);
+      filtered = filtered.filter((brand) => brand.location === filters.location);
     }
 
     // Verified filter
     if (filters.verifiedOnly) {
-      filtered = filtered.filter((sponsor) => sponsor.verified);
+      filtered = filtered.filter((brand) => brand.verified);
     }
 
     // Contact unlock filter
     if (filters.contactUnlock && filters.contactUnlock !== "all") {
-      filtered = filtered.filter((sponsor) => sponsor.contactUnlock === filters.contactUnlock);
+      const isFreeAccess = filters.contactUnlock === "free";
+      filtered = filtered.filter((brand) => !brand.unlockContactPaid === isFreeAccess);
     }
 
     return filtered;
-  }, [searchQuery, filters]);
+  }, [brands, searchQuery, filters]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="h-12 w-12 border-4 border-yellow-400/20 border-t-yellow-400 rounded-full mx-auto mb-4"
+        />
+        <p className="text-blue-200">Loading sponsors...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-6xl mb-4">❌</div>
+        <h3 className="text-2xl font-bold text-white mb-2">Something went wrong</h3>
+        <p className="text-blue-200">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {filteredSponsors.length === 0 ? (
+      {filteredBrands.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -221,14 +144,14 @@ export function SponsorGrid({ viewMode, searchQuery, filters }: SponsorGridProps
               : "space-y-4"
           }
         >
-          {filteredSponsors.map((sponsor, index) => (
+          {filteredBrands.map((brand, index) => (
             <motion.div
-              key={sponsor.id}
+              key={brand.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <SponsorCard sponsor={sponsor} viewMode={viewMode} />
+              <PublicBrandCard brand={brand} viewMode={viewMode} />
             </motion.div>
           ))}
         </div>

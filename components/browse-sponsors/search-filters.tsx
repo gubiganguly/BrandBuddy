@@ -12,7 +12,7 @@ import { Search, Filter, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Filters {
-  category: string;
+  categories: string[];
   dealType: string;
   location: string;
   verifiedOnly: boolean;
@@ -39,13 +39,15 @@ const locations = [
 export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters }: SearchFiltersProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  const activeFiltersCount = Object.values(filters).filter(value => 
-    typeof value === 'boolean' ? value : (value !== '' && value !== 'all')
-  ).length;
+  const activeFiltersCount = Object.entries(filters).filter(([key, value]) => {
+    if (typeof value === 'boolean') return value;
+    if (key === 'categories') return Array.isArray(value) && value.length > 0;
+    return value !== '' && value !== 'all';
+  }).length;
 
   const clearAllFilters = () => {
     setFilters({
-      category: "all",
+      categories: [],
       dealType: "all",
       location: "all",
       verifiedOnly: false,
@@ -53,9 +55,14 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
     });
   };
 
-  const removeFilter = (filterKey: keyof Filters) => {
+  const removeFilter = (filterKey: keyof Filters, filterValue?: string) => {
     if (filterKey === 'verifiedOnly') {
       setFilters({ ...filters, [filterKey]: false });
+    } else if (filterKey === 'categories' && filterValue) {
+      setFilters({ 
+        ...filters, 
+        categories: filters.categories.filter(cat => cat !== filterValue)
+      });
     } else {
       setFilters({ ...filters, [filterKey]: "all" });
     }
@@ -64,9 +71,10 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
   const getActiveFilterChips = () => {
     const chips = [];
     
-    if (filters.category !== "all") {
-      chips.push({ key: "category", label: filters.category, value: filters.category });
-    }
+    // Add chips for each selected category
+    filters.categories.forEach(category => {
+      chips.push({ key: "categories", label: category, value: category });
+    });
     if (filters.dealType !== "all") {
       chips.push({ key: "dealType", label: `Deal: ${filters.dealType}`, value: filters.dealType });
     }
@@ -126,11 +134,11 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
               </PopoverTrigger>
               
               <PopoverContent 
-                className="w-[600px] p-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-xl border-white/20"
+                className="w-[95vw] max-w-md sm:max-w-lg md:max-w-2xl p-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-xl border-white/20"
                 align="end"
                 sideOffset={8}
               >
-                <div className="p-6 space-y-6">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   {/* Header */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -153,80 +161,158 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
                   <Separator className="bg-white/10" />
 
                   {/* Filter Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-6">
                     {/* Category Filter */}
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-blue-200">Category</label>
-                      <Select value={filters.category} onValueChange={(value) => 
-                        setFilters({ ...filters, category: value })
-                      }>
-                        <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
-                          <SelectValue placeholder="All Categories" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-blue-900 border-blue-700">
-                          <SelectItem value="all" className="text-white hover:bg-blue-800">All Categories</SelectItem>
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category} className="text-white hover:bg-blue-800">
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <label className="text-sm font-medium text-blue-200">Categories</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors h-auto min-h-[44px] px-3 py-2"
+                          >
+                            <span className="text-left flex-1">
+                              {filters.categories.length === 0 ? (
+                                <span className="text-blue-300">Select categories...</span>
+                              ) : filters.categories.length === 1 ? (
+                                filters.categories[0]
+                              ) : (
+                                <span>
+                                  {filters.categories.length} categories selected
+                                </span>
+                              )}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent 
+                          className="w-[280px] sm:w-[320px] p-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-xl border-white/20"
+                          align="start"
+                        >
+                          <div className="p-3 sm:p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-blue-200">
+                                Select Categories
+                              </span>
+                              {filters.categories.length > 0 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setFilters({ ...filters, categories: [] })}
+                                  className="text-blue-300 hover:text-yellow-400 h-auto p-1 text-xs"
+                                >
+                                  Clear all
+                                </Button>
+                              )}
+                            </div>
+                            <Separator className="bg-white/10" />
+                            <div className="max-h-48 sm:max-h-64 overflow-y-auto space-y-2">
+                              {categories.map((category) => (
+                                <div key={category} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                                  <Checkbox
+                                    id={`category-dropdown-${category}`}
+                                    checked={filters.categories.includes(category)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setFilters({ 
+                                          ...filters, 
+                                          categories: [...filters.categories, category] 
+                                        });
+                                      } else {
+                                        setFilters({ 
+                                          ...filters, 
+                                          categories: filters.categories.filter(cat => cat !== category)
+                                        });
+                                      }
+                                    }}
+                                    className="border-white/30 data-[state=checked]:bg-yellow-400 data-[state=checked]:border-yellow-400"
+                                  />
+                                  <label 
+                                    htmlFor={`category-dropdown-${category}`} 
+                                    className="text-white text-sm cursor-pointer hover:text-yellow-400 transition-colors flex-1"
+                                  >
+                                    {category}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                            {filters.categories.length > 0 && (
+                              <>
+                                <Separator className="bg-white/10" />
+                                <div className="flex flex-wrap gap-1 pt-2">
+                                  {filters.categories.map((category) => (
+                                    <Badge
+                                      key={category}
+                                      className="bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 text-xs px-2 py-1"
+                                    >
+                                      {category}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
-                    {/* Deal Type Filter */}
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium text-blue-200">Deal Type</label>
-                      <Select value={filters.dealType} onValueChange={(value) => 
-                        setFilters({ ...filters, dealType: value })
-                      }>
-                        <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
-                          <SelectValue placeholder="All Types" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-blue-900 border-blue-700">
-                          <SelectItem value="all" className="text-white hover:bg-blue-800">All Types</SelectItem>
-                          <SelectItem value="cash" className="text-white hover:bg-blue-800">Cash</SelectItem>
-                          <SelectItem value="product" className="text-white hover:bg-blue-800">Product</SelectItem>
-                          <SelectItem value="both" className="text-white hover:bg-blue-800">Both</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Other Filters Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Deal Type Filter */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium text-blue-200">Deal Type</label>
+                        <Select value={filters.dealType} onValueChange={(value) => 
+                          setFilters({ ...filters, dealType: value })
+                        }>
+                          <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
+                            <SelectValue placeholder="All Types" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-blue-900 border-blue-700">
+                            <SelectItem value="all" className="text-white hover:bg-blue-800">All Types</SelectItem>
+                            <SelectItem value="cash" className="text-white hover:bg-blue-800">Cash</SelectItem>
+                            <SelectItem value="product" className="text-white hover:bg-blue-800">Product</SelectItem>
+                            <SelectItem value="both" className="text-white hover:bg-blue-800">Both</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Location Filter */}
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium text-blue-200">Location</label>
-                      <Select value={filters.location} onValueChange={(value) => 
-                        setFilters({ ...filters, location: value })
-                      }>
-                        <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
-                          <SelectValue placeholder="All Locations" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-blue-900 border-blue-700">
-                          <SelectItem value="all" className="text-white hover:bg-blue-800">All Locations</SelectItem>
-                          {locations.map((location) => (
-                            <SelectItem key={location} value={location} className="text-white hover:bg-blue-800">
-                              {location}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                      {/* Location Filter */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium text-blue-200">Location</label>
+                        <Select value={filters.location} onValueChange={(value) => 
+                          setFilters({ ...filters, location: value })
+                        }>
+                          <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
+                            <SelectValue placeholder="All Locations" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-blue-900 border-blue-700">
+                            <SelectItem value="all" className="text-white hover:bg-blue-800">All Locations</SelectItem>
+                            {locations.map((location) => (
+                              <SelectItem key={location} value={location} className="text-white hover:bg-blue-800">
+                                {location}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Contact Unlock Filter */}
-                    <div className="space-y-3">
-                      <label className="text-sm font-medium text-blue-200">Contact Access</label>
-                      <Select value={filters.contactUnlock} onValueChange={(value) => 
-                        setFilters({ ...filters, contactUnlock: value })
-                      }>
-                        <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
-                          <SelectValue placeholder="All Access" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-blue-900 border-blue-700">
-                          <SelectItem value="all" className="text-white hover:bg-blue-800">All Access</SelectItem>
-                          <SelectItem value="free" className="text-white hover:bg-blue-800">Free</SelectItem>
-                          <SelectItem value="paid" className="text-white hover:bg-blue-800">Paid</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {/* Contact Unlock Filter */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium text-blue-200">Contact Access</label>
+                        <Select value={filters.contactUnlock} onValueChange={(value) => 
+                          setFilters({ ...filters, contactUnlock: value })
+                        }>
+                          <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
+                            <SelectValue placeholder="All Access" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-blue-900 border-blue-700">
+                            <SelectItem value="all" className="text-white hover:bg-blue-800">All Access</SelectItem>
+                            <SelectItem value="free" className="text-white hover:bg-blue-800">Free</SelectItem>
+                            <SelectItem value="paid" className="text-white hover:bg-blue-800">Paid</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 
@@ -275,7 +361,7 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeFilter(chip.key as keyof Filters)}
+                    onClick={() => removeFilter(chip.key as keyof Filters, chip.value)}
                     className="h-4 w-4 p-0 hover:bg-yellow-400/20 rounded-full"
                   >
                     <X className="h-3 w-3" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -8,11 +9,16 @@ import { Search, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function HeroSection() {
+  const router = useRouter();
   const [eventLink, setEventLink] = useState("");
   const [isGlobal, setIsGlobal] = useState(false);
 
+  const handleFindSponsors = () => {
+    router.push("/browse-sponsors");
+  };
+
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -62,21 +68,22 @@ export function HeroSection() {
         >
           {/* Main Heading */}
           <div className="space-y-4">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
               Find Your Perfect{" "}
-              <span className="text-yellow-400 relative">
-                Sponsor
+              <span className="relative">
+                <span className="text-yellow-400 relative z-10">Sponsor</span>
+                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-lg blur-lg"></div>
                 <motion.div
-                  className="absolute -top-2 -right-2"
+                  className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 z-20"
                   animate={{ rotate: [0, 15, -15, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <Sparkles className="h-8 w-8 text-yellow-400" />
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400" />
                 </motion.div>
               </span>
             </h1>
             
-            <p className="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed px-2">
               Paste your event link to get instantly matched with brands that vibe with your audience.
             </p>
           </div>
@@ -89,27 +96,28 @@ export function HeroSection() {
             className="space-y-6"
           >
             {/* Main Search Box */}
-            <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-2xl">
-              <div className="flex items-center gap-3">
-                {/* Search Icon */}
-                <Search className="h-6 w-6 text-blue-300 flex-shrink-0" />
-                
-                {/* Search Input */}
-                <Input
-                  placeholder="Paste your event link (e.g. Partiful, Posh)"
-                  value={eventLink}
-                  onChange={(e) => setEventLink(e.target.value)}
-                  className="flex-1 border-0 bg-transparent text-white text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                />
+            <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-3 sm:p-4 border border-white/20 shadow-2xl max-w-4xl mx-auto">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Search Input with Icon */}
+                <div className="flex items-center gap-3 flex-1">
+                  <Search className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300 flex-shrink-0" />
+                  <Input
+                    placeholder="Paste your event link (e.g. Partiful, Posh)"
+                    value={eventLink}
+                    onChange={(e) => setEventLink(e.target.value)}
+                    className="flex-1 border-0 bg-transparent text-white text-base sm:text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                  />
+                </div>
                 
                 {/* Find Sponsors Button */}
                 <Button 
                   size="lg"
-                  className="bg-yellow-400 text-blue-950 hover:bg-yellow-300 font-semibold px-6 py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                  onClick={handleFindSponsors}
+                  className="bg-yellow-400 text-blue-950 hover:bg-yellow-300 font-semibold px-4 sm:px-6 py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
                 >
-                  <Search className="h-5 w-5 mr-2" />
+                  <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   <span className="hidden sm:inline">Find Sponsors</span>
-                  <span className="sm:hidden">Find</span>
+                  <span className="sm:hidden">Find Sponsors</span>
                 </Button>
               </div>
             </div>

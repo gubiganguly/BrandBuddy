@@ -29,7 +29,7 @@ const features = [
 
 export function FeatureHighlights() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -38,16 +38,16 @@ export function FeatureHighlights() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
             Why Event Planners{" "}
             <span className="text-yellow-400">Love Us</span>
           </h2>
-          <p className="text-xl text-blue-200 max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl text-blue-200 max-w-3xl mx-auto px-2">
             We've built the perfect platform to connect authentic events with brands that actually care about your community.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -59,18 +59,18 @@ export function FeatureHighlights() {
               className="h-full"
             >
               <Card className="h-full bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all duration-300 group">
-                <CardContent className="p-6 text-center h-full flex flex-col">
+                <CardContent className="p-4 sm:p-6 text-center h-full flex flex-col">
                   <div className="mb-6">
                     <div className="w-16 h-16 mx-auto mb-4 bg-yellow-400/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <feature.icon className="h-8 w-8 text-yellow-400" />
                     </div>
                   </div>
                   
-                  <h3 className="text-xl font-bold text-white mb-4 group-hover:text-yellow-400 transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 group-hover:text-yellow-400 transition-colors">
                     {feature.title}
                   </h3>
                   
-                  <p className="text-blue-200 leading-relaxed flex-grow">
+                  <p className="text-sm sm:text-base text-blue-200 leading-relaxed flex-grow">
                     {feature.description}
                   </p>
                 </CardContent>
