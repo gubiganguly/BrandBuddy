@@ -189,15 +189,17 @@ export function Navbar() {
 
           {/* Mobile Browse Sponsors + Profile/Login */}
           <div className="md:hidden flex items-center space-x-2">
-            <Link href="/browse-sponsors">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-yellow-400 font-medium transition-colors"
-              >
-                Browse Sponsors
-              </Button>
-            </Link>
+            {user && (
+              <Link href="/browse-sponsors">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-yellow-400 font-medium transition-colors"
+                >
+                  Browse Sponsors
+                </Button>
+              </Link>
+            )}
             
             {loading ? (
               <div className="h-8 w-8 bg-white/10 rounded-full animate-pulse"></div>
