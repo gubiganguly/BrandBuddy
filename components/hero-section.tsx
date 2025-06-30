@@ -12,9 +12,52 @@ export function HeroSection() {
   const router = useRouter();
   const [eventLink, setEventLink] = useState("");
   const [isGlobal, setIsGlobal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleFindSponsors = () => {
-    router.push("/browse-sponsors");
+  const handleFindSponsors = async () => {
+    if (!eventLink.trim()) {
+      // If no event link, just go to browse sponsors
+      router.push("/browse-sponsors");
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/event-scrape', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ eventLink: eventLink.trim() }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('Event data extracted:', result.data);
+        
+        // Extract categories from event data and pass them to browse sponsors
+        const eventCategories = result.data.category;
+        let categoriesParam = '';
+        
+        if (eventCategories) {
+          // Handle both single category (string) and multiple categories (array)
+          const categoriesArray = Array.isArray(eventCategories) ? eventCategories : [eventCategories];
+          categoriesParam = `?categories=${encodeURIComponent(categoriesArray.join(','))}`;
+        }
+        
+        router.push(`/browse-sponsors${categoriesParam}`);
+      } else {
+        console.error('Failed to scrape event:', result.error);
+        alert('Failed to extract event data. Please check the link and try again.');
+      }
+    } catch (error) {
+      console.error('Error calling scrape API:', error);
+      alert('An error occurred while processing the event link.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -113,11 +156,22 @@ export function HeroSection() {
                 <Button 
                   size="lg"
                   onClick={handleFindSponsors}
-                  className="bg-yellow-400 text-blue-950 hover:bg-yellow-300 font-semibold px-4 sm:px-6 py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
+                  disabled={isLoading}
+                  className="bg-yellow-400 text-blue-950 hover:bg-yellow-300 font-semibold px-4 sm:px-6 py-3 h-auto shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                  <span className="hidden sm:inline">Find Sponsors</span>
-                  <span className="sm:hidden">Find Sponsors</span>
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-blue-950 border-t-transparent mr-2" />
+                      <span className="hidden sm:inline">Processing...</span>
+                      <span className="sm:hidden">Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Search className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="hidden sm:inline">Find Sponsors</span>
+                      <span className="sm:hidden">Find Sponsors</span>
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

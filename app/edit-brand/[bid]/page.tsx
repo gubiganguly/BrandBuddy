@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { 
   ArrowLeft, 
@@ -36,26 +37,11 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { getBrandById, updateBrand, deactivateBrand } from "@/lib/firebase/brands/brandModel";
 import { Brand, DealType } from "@/lib/firebase/brands/brandSchema";
+import { getCategories, getCities } from "@/lib/config";
 
-// Brand categories
-const brandCategories = [
-  "Technology", "Food & Beverage", "Fashion & Apparel", "Sports & Fitness", "Healthcare",
-  "Automotive", "Finance & Banking", "Real Estate", "Entertainment", "Education",
-  "Travel & Tourism", "Beauty & Cosmetics", "Home & Garden", "Electronics", "Music",
-  "Art & Design", "Non-Profit", "Media & Publishing", "Construction", "Retail",
-  "Professional Services", "Manufacturing", "Agriculture", "Energy", "Telecommunications"
-];
-
-// US Cities (same as profile settings)
-const usCities = [
-  "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
-  "Philadelphia, PA", "San Antonio, TX", "San Diego, CA", "Dallas, TX", "San Jose, CA",
-  "Austin, TX", "Jacksonville, FL", "Fort Worth, TX", "Columbus, OH", "Charlotte, NC",
-  "San Francisco, CA", "Indianapolis, IN", "Seattle, WA", "Denver, CO", "Washington, DC",
-  "Boston, MA", "El Paso, TX", "Nashville, TN", "Detroit, MI", "Oklahoma City, OK",
-  "Portland, OR", "Las Vegas, NV", "Memphis, TN", "Louisville, KY", "Baltimore, MD",
-  // Add more cities as needed...
-];
+// Get categories and cities from centralized config
+const brandCategories = getCategories();
+const usCities = getCities();
 
 // Deal type options
 const dealTypeOptions = [
@@ -119,7 +105,6 @@ export default function EditBrandPage() {
   const [unlockContactPaid, setUnlockContactPaid] = useState(false);
 
   // UI state
-  const [categoryOpen, setCategoryOpen] = useState(false);
   const [brandLocationOpen, setBrandLocationOpen] = useState(false);
   const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
 
@@ -423,43 +408,25 @@ export default function EditBrandPage() {
                     <label className="text-sm font-medium text-blue-200">
                       Category <span className="text-red-400">*</span>
                     </label>
-                    <div className="relative">
-                      <Input
-                        value={brandCategory}
-                        onChange={(e) => {
-                          setBrandCategory(e.target.value);
-                          setCategoryOpen(e.target.value.length > 0);
-                        }}
-                        onFocus={() => setCategoryOpen(true)}
-                        onBlur={() => setTimeout(() => setCategoryOpen(false), 200)}
-                        className="pr-10 bg-white/10 border-white/20 text-white placeholder:text-blue-300 focus:border-yellow-400/50"
-                        placeholder="Type to search categories..."
-                      />
-                      <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-300 opacity-50" />
-                      
-                      {categoryOpen && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-blue-900/95 backdrop-blur-xl border border-blue-700/50 rounded-md shadow-2xl z-20 max-h-48 overflow-y-auto">
-                          {brandCategories
-                            .filter(category => 
-                              category.toLowerCase().includes(brandCategory.toLowerCase()) && category.toLowerCase() !== brandCategory.toLowerCase()
-                            )
-                            .slice(0, 8)
-                            .map((category) => (
-                              <div
-                                key={category}
-                                onClick={() => {
-                                  setBrandCategory(category);
-                                  setCategoryOpen(false);
-                                }}
-                                className="flex items-center px-3 py-2 text-white hover:bg-white/10 cursor-pointer first:rounded-t-md last:rounded-b-md"
-                              >
-                                <Tag className="mr-2 h-4 w-4 text-blue-300" />
-                                {category}
-                              </div>
-                            ))}
-                        </div>
-                      )}
-                    </div>
+                    <Select value={brandCategory} onValueChange={setBrandCategory}>
+                      <SelectTrigger className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-blue-900 border-blue-700 max-h-60">
+                        {brandCategories.map((category) => (
+                          <SelectItem 
+                            key={category} 
+                            value={category}
+                            className="text-white hover:bg-blue-800 focus:bg-blue-800"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-blue-300" />
+                              {category}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

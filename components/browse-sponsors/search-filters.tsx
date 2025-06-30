@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { Search, Filter, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getCategories, getCities } from "@/lib/config";
 
 interface Filters {
   categories: string[];
@@ -26,15 +27,8 @@ interface SearchFiltersProps {
   setFilters: (filters: Filters) => void;
 }
 
-const categories = [
-  "Technology", "Fashion", "Food & Beverage", "Health & Fitness", 
-  "Travel", "Entertainment", "Education", "Gaming", "Beauty", "Sports"
-];
-
-const locations = [
-  "Austin, TX", "San Francisco, CA", "New York, NY", "Los Angeles, CA",
-  "Chicago, IL", "Miami, FL", "Seattle, WA", "Denver, CO", "Global"
-];
+const categories = getCategories();
+const locations = getCities();
 
 export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters }: SearchFiltersProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);

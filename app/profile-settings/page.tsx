@@ -45,57 +45,11 @@ import { getUserById, updateUser } from "@/lib/firebase/users/userModel";
 import { User as UserData, UserRole } from "@/lib/firebase/users/userSchema";
 import { createBrand, getBrandsByOwner } from "@/lib/firebase/brands/brandModel";
 import { DealType, Brand } from "@/lib/firebase/brands/brandSchema";
+import { getCategories, getCities } from "@/lib/config";
 
-// US Cities data
-const usCities = [
-  "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ",
-  "Philadelphia, PA", "San Antonio, TX", "San Diego, CA", "Dallas, TX", "San Jose, CA",
-  "Austin, TX", "Jacksonville, FL", "Fort Worth, TX", "Columbus, OH", "Charlotte, NC",
-  "San Francisco, CA", "Indianapolis, IN", "Seattle, WA", "Denver, CO", "Washington, DC",
-  "Boston, MA", "El Paso, TX", "Nashville, TN", "Detroit, MI", "Oklahoma City, OK",
-  "Portland, OR", "Las Vegas, NV", "Memphis, TN", "Louisville, KY", "Baltimore, MD",
-  "Milwaukee, WI", "Albuquerque, NM", "Tucson, AZ", "Fresno, CA", "Sacramento, CA",
-  "Kansas City, MO", "Mesa, AZ", "Atlanta, GA", "Omaha, NE", "Colorado Springs, CO",
-  "Raleigh, NC", "Miami, FL", "Oakland, CA", "Minneapolis, MN", "Tulsa, OK",
-  "Cleveland, OH", "Wichita, KS", "Arlington, TX", "New Orleans, LA", "Bakersfield, CA",
-  "Tampa, FL", "Honolulu, HI", "Aurora, CO", "Anaheim, CA", "Santa Ana, CA",
-  "St. Louis, MO", "Riverside, CA", "Corpus Christi, TX", "Lexington, KY", "Pittsburgh, PA",
-  "Anchorage, AK", "Stockton, CA", "Cincinnati, OH", "St. Paul, MN", "Toledo, OH",
-  "Greensboro, NC", "Newark, NJ", "Plano, TX", "Henderson, NV", "Lincoln, NE",
-  "Buffalo, NY", "Jersey City, NJ", "Chula Vista, CA", "Fort Wayne, IN", "Orlando, FL",
-  "St. Petersburg, FL", "Chandler, AZ", "Laredo, TX", "Norfolk, VA", "Durham, NC",
-  "Madison, WI", "Lubbock, TX", "Irvine, CA", "Winston-Salem, NC", "Glendale, AZ",
-  "Garland, TX", "Hialeah, FL", "Reno, NV", "Chesapeake, VA", "Gilbert, AZ",
-  "Baton Rouge, LA", "Irving, TX", "Scottsdale, AZ", "North Las Vegas, NV", "Fremont, CA",
-  "Boise, ID", "Richmond, VA", "San Bernardino, CA", "Birmingham, AL", "Spokane, WA",
-  "Rochester, NY", "Des Moines, IA", "Modesto, CA", "Fayetteville, NC", "Tacoma, WA",
-  "Oxnard, CA", "Fontana, CA", "Columbus, GA", "Montgomery, AL", "Moreno Valley, CA",
-  "Shreveport, LA", "Aurora, IL", "Yonkers, NY", "Akron, OH", "Huntington Beach, CA",
-  "Little Rock, AR", "Augusta, GA", "Amarillo, TX", "Glendale, CA", "Mobile, AL",
-  "Grand Rapids, MI", "Salt Lake City, UT", "Tallahassee, FL", "Huntsville, AL", "Grand Prairie, TX",
-  "Knoxville, TN", "Worcester, MA", "Newport News, VA", "Brownsville, TX", "Overland Park, KS",
-  "Santa Clarita, CA", "Providence, RI", "Garden Grove, CA", "Chattanooga, TN", "Oceanside, CA",
-  "Jackson, MS", "Fort Lauderdale, FL", "Santa Rosa, CA", "Rancho Cucamonga, CA", "Port St. Lucie, FL",
-  "Tempe, AZ", "Ontario, CA", "Vancouver, WA", "Cape Coral, FL", "Sioux Falls, SD",
-  "Springfield, MO", "Peoria, AZ", "Pembroke Pines, FL", "Elk Grove, CA", "Salem, OR",
-  "Lancaster, CA", "Corona, CA", "Eugene, OR", "Palmdale, CA", "Salinas, CA",
-  "Springfield, MA", "Pasadena, CA", "Fort Collins, CO", "Hayward, CA", "Pomona, CA",
-  "Cary, NC", "Rockford, IL", "Alexandria, VA", "Escondido, CA", "McKinney, TX",
-  "Kansas City, KS", "Joliet, IL", "Sunnyvale, CA", "Torrance, CA", "Bridgeport, CT",
-  "Lakewood, CO", "Hollywood, FL", "Paterson, NJ", "Naperville, IL", "Syracuse, NY",
-  "Mesquite, TX", "Dayton, OH", "Savannah, GA", "Clarksville, TN", "Orange, CA",
-  "Pasadena, TX", "Fullerton, CA", "Killeen, TX", "Frisco, TX", "Hampton, VA",
-  "McAllen, TX", "Warren, MI", "Bellevue, WA", "West Valley City, UT", "Columbia, MO"
-];
-
-// Brand categories
-const brandCategories = [
-  "Technology", "Food & Beverage", "Fashion & Apparel", "Sports & Fitness", "Healthcare",
-  "Automotive", "Finance & Banking", "Real Estate", "Entertainment", "Education",
-  "Travel & Tourism", "Beauty & Cosmetics", "Home & Garden", "Electronics", "Music",
-  "Art & Design", "Non-Profit", "Media & Publishing", "Construction", "Retail",
-  "Professional Services", "Manufacturing", "Agriculture", "Energy", "Telecommunications"
-];
+// Get cities and categories from centralized config
+const usCities = getCities();
+const brandCategories = getCategories();
 
 // Deal type options
 const dealTypeOptions = [
