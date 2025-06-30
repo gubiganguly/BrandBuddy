@@ -105,7 +105,7 @@ export function HeroSection() {
                     placeholder="Paste your event link (e.g. Partiful, Posh)"
                     value={eventLink}
                     onChange={(e) => setEventLink(e.target.value)}
-                    className="flex-1 border-0 bg-transparent text-white text-base sm:text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                    className="flex-1 border-0 bg-transparent text-white text-sm sm:text-base lg:text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
                   />
                 </div>
                 

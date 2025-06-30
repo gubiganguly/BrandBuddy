@@ -112,7 +112,7 @@ export function SearchFilters({ searchQuery, setSearchQuery, filters, setFilters
               placeholder="Search sponsors by name, category, or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 border-0 bg-transparent text-white text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+              className="flex-1 border-0 bg-transparent text-white text-sm sm:text-base lg:text-lg placeholder:text-blue-200 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
             />
             
             {/* Filters Popover Trigger */}

@@ -405,19 +405,20 @@ export default function ProfileSettingsPage() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        className="absolute top-6 left-6 z-10"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10"
       >
         <Link 
           href="/"
           className="flex items-center gap-2 text-white hover:text-yellow-400 transition-colors group"
         >
           <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Back to Home</span>
+          <span className="font-medium hidden sm:inline">Back to Home</span>
+          <span className="font-medium sm:hidden">Back</span>
         </Link>
       </motion.div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10 pt-12 sm:pt-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
