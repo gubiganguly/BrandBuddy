@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright';
 import OpenAI from 'openai';
 import { getCategories } from '@/lib/config';
 
@@ -58,125 +57,55 @@ export async function POST(request: NextRequest) {
 
     console.log(`Starting to scrape event from ${platform}: ${eventLink}`);
 
-    // Launch Playwright browser
-    let browser;
+    // Use simple HTTP fetch instead of browser automation for Vercel compatibility
     try {
-      browser = await chromium.launch({ 
-        headless: true,
-        args: [
-          '--no-sandbox', 
-          '--disable-setuid-sandbox', 
-          '--disable-dev-shm-usage',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-features=VizDisplayCompositor'
-        ]
-      });
-      console.log('Browser launched successfully');
-    } catch (browserError) {
-      console.error('Failed to launch browser:', browserError);
-      return NextResponse.json(
-        { error: 'Failed to launch browser', details: browserError instanceof Error ? browserError.message : 'Unknown browser error' },
-        { status: 500 }
-      );
-    }
-    
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      viewport: { width: 1280, height: 720 },
-      extraHTTPHeaders: {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-      }
-    });
-    
-    const page = await context.newPage();
-    
-    // Add stealth measures
-    await page.addInitScript(() => {
-      // Remove webdriver property
-      delete (window as any).navigator.webdriver;
+      console.log('Fetching page content...');
       
-      // Override the plugins length
-      Object.defineProperty(navigator, 'plugins', {
-        get: () => [1, 2, 3, 4, 5]
+      const response = await fetch(eventLink, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate',
+          'DNT': '1',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+        },
+        method: 'GET',
       });
-    });
 
-    try {
-      console.log('Navigating to page...');
-      
-      // Try multiple loading strategies
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const htmlContent = await response.text();
+      console.log('Successfully fetched HTML content, length:', htmlContent.length);
+
+      // Extract text content from HTML
       let pageText = '';
-      let loadSuccess = false;
-
-      // Strategy 1: Try with domcontentloaded (faster)
       try {
-        await page.goto(eventLink, { 
-          waitUntil: 'domcontentloaded',
-          timeout: 15000 
-        });
-        await page.waitForTimeout(2000); // Wait for dynamic content
-        pageText = await page.evaluate(() => document.body.innerText);
-        if (pageText.length > 100) { // Check if we got meaningful content
-          loadSuccess = true;
-          console.log('Page loaded successfully with domcontentloaded');
-        }
-      } catch (fastLoadError) {
-        const errorMessage = fastLoadError instanceof Error ? fastLoadError.message : 'Unknown error';
-        console.log('Fast load failed, trying slower approach:', errorMessage);
-      }
+        // Simple HTML parsing to extract text content
+        pageText = htmlContent
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+          .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove styles
+          .replace(/<[^>]*>/g, ' ') // Remove HTML tags
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
 
-      // Strategy 2: If fast load failed, try with load event
-      if (!loadSuccess) {
-        try {
-          await page.goto(eventLink, { 
-            waitUntil: 'load',
-            timeout: 20000 
-          });
-          await page.waitForTimeout(3000);
-          pageText = await page.evaluate(() => document.body.innerText);
-          if (pageText.length > 100) {
-            loadSuccess = true;
-            console.log('Page loaded successfully with load event');
-          }
-        } catch (normalLoadError) {
-          const errorMessage = normalLoadError instanceof Error ? normalLoadError.message : 'Unknown error';
-          console.log('Normal load failed, trying minimal approach:', errorMessage);
-        }
+        console.log('Extracted text content, length:', pageText.length);
+        console.log('First 500 chars of content:', pageText.slice(0, 500));
+      } catch (parseError) {
+        console.error('Error parsing HTML:', parseError);
+        // Fallback: use raw HTML if text extraction fails
+        pageText = htmlContent.slice(0, 4000);
       }
-
-      // Strategy 3: Last resort - minimal loading
-      if (!loadSuccess) {
-        try {
-          await page.goto(eventLink, { 
-            waitUntil: 'commit',
-            timeout: 10000 
-          });
-          await page.waitForTimeout(5000); // Give more time for content to load
-          pageText = await page.evaluate(() => document.body.innerText);
-          loadSuccess = true;
-          console.log('Page loaded with minimal strategy');
-        } catch (minimalLoadError) {
-          const errorMessage = minimalLoadError instanceof Error ? minimalLoadError.message : 'Unknown error';
-          console.error('All loading strategies failed:', errorMessage);
-          throw new Error(`Failed to load page after multiple attempts: ${errorMessage}`);
-        }
-      }
-
-      console.log('Successfully scraped page content, length:', pageText.length);
-      console.log('First 500 chars of content:', pageText.slice(0, 500));
 
       // Check if we got meaningful content
       if (pageText.length < 50) {
-        console.warn('Very little content extracted, might be blocked or redirected');
+        console.warn('Very little content extracted, might be blocked or dynamic content');
+        // Try to use raw HTML for OpenAI processing
+        pageText = htmlContent.slice(0, 4000);
       }
-
-      // Close browser
-      await browser.close();
 
       // Process with OpenAI
       console.log('Processing with OpenAI...');
@@ -193,7 +122,6 @@ export async function POST(request: NextRequest) {
 
     } catch (scrapeError) {
       console.error('Scraping error:', scrapeError);
-      await browser.close();
       throw scrapeError;
     }
 
