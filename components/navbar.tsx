@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Menu, User, LogOut, Settings, Shield } from "lucide-react";
+import { User, LogOut, Settings, Shield } from "lucide-react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { logOut } from "@/lib/firebase/auth";
@@ -14,7 +13,6 @@ import { getUserById } from "@/lib/firebase/users/userModel";
 import { User as UserData } from "@/lib/firebase/users/userSchema";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -189,7 +187,7 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile Browse Sponsors + Menu */}
+          {/* Mobile Browse Sponsors + Profile/Login */}
           <div className="md:hidden flex items-center space-x-2">
             <Link href="/browse-sponsors">
               <Button 
@@ -200,89 +198,101 @@ export function Navbar() {
                 Browse Sponsors
               </Button>
             </Link>
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" className="text-white p-2">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="bg-blue-950 border-blue-900">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className="flex flex-col space-y-6 mt-8">
-                  <div className="flex flex-col space-y-4 pt-6 border-t border-white/10">
-                    {user ? (
-                      <>
-                        {/* Mobile Profile Section */}
-                        <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/5">
-                          {user.photoURL ? (
-                            <img
-                              src={user.photoURL}
-                              alt="Profile"
-                              className="h-10 w-10 rounded-full object-cover border-2 border-yellow-400/50"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-blue-950 font-bold text-sm">
-                              {getProfileInitials(getDisplayName(), user.email)}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium truncate">
-                              {getDisplayName()}
-                            </p>
-                            <p className="text-blue-200 text-sm truncate">
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        {/* Mobile Menu Items */}
-                        <Link href="/profile-settings" onClick={() => setIsOpen(false)}>
-                          <Button
-                            variant="ghost"
-                            className="text-white hover:text-yellow-400 hover:bg-white/10 justify-start w-full"
-                          >
-                            <User className="mr-3 h-4 w-4" />
-                            Profile Settings
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          className="text-white hover:text-yellow-400 hover:bg-white/10 justify-start"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          <Shield className="mr-3 h-4 w-4" />
-                          My Sponsorships
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            setIsOpen(false);
-                            handleLogout();
-                          }}
-                          className="text-red-300 hover:text-red-200 hover:bg-red-500/20 justify-start"
-                        >
-                          <LogOut className="mr-3 h-4 w-4" />
-                          Sign Out
-                        </Button>
-                      </>
+            
+            {loading ? (
+              <div className="h-8 w-8 bg-white/10 rounded-full animate-pulse"></div>
+            ) : user ? (
+              // Mobile User Profile Card
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-white/10">
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt="Profile"
+                        className="h-10 w-10 rounded-full object-cover border-2 border-yellow-400/50 hover:border-yellow-400 transition-colors"
+                      />
                     ) : (
-                      <>
-                        <Link href="/login" onClick={() => setIsOpen(false)}>
-                          <Button variant="ghost" className="text-white hover:text-yellow-400 hover:bg-white/10 justify-start w-full">
-                            Log In
-                          </Button>
-                        </Link>
-                        <Link href="/signup" onClick={() => setIsOpen(false)}>
-                          <Button className="bg-yellow-400 text-blue-950 hover:bg-yellow-300 font-semibold w-full">
-                            Sign Up
-                          </Button>
-                        </Link>
-                      </>
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-blue-950 font-bold text-sm border-2 border-yellow-400/50 hover:border-yellow-400 transition-colors">
+                        {getProfileInitials(getDisplayName(), user.email)}
+                      </div>
                     )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-blue-900/95 backdrop-blur-xl border-blue-700/50 shadow-2xl" align="end">
+                  <div className="space-y-4">
+                    {/* Profile Header */}
+                    <div className="flex items-center space-x-3">
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt="Profile"
+                          className="h-12 w-12 rounded-full object-cover border-2 border-yellow-400/50"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-blue-950 font-bold">
+                          {getProfileInitials(getDisplayName(), user.email)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-medium truncate">
+                          {getDisplayName()}
+                        </p>
+                        <p className="text-blue-200 text-sm truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <Separator className="bg-white/20" />
+                    
+                    {/* Menu Items */}
+                    <div className="space-y-1">
+                      <Link href="/profile-settings">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-white hover:text-yellow-400 hover:bg-white/10"
+                        >
+                          <User className="mr-3 h-4 w-4" />
+                          Profile Settings
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-white hover:text-yellow-400 hover:bg-white/10"
+                      >
+                        <Shield className="mr-3 h-4 w-4" />
+                        My Sponsorships
+                      </Button>
+                    </div>
+                    
+                    <Separator className="bg-white/20" />
+                    
+                    {/* Logout */}
+                    <Button
+                      variant="ghost"
+                      onClick={handleLogout}
+                      className="w-full justify-start text-red-300 hover:text-red-200 hover:bg-red-500/20"
+                    >
+                      <LogOut className="mr-3 h-4 w-4" />
+                      Sign Out
+                    </Button>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              // Mobile Login Button
+              <Link href="/login">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-yellow-400/10 border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/20 hover:text-yellow-300 font-medium transition-colors"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
