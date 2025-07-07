@@ -156,7 +156,7 @@ export default function SignUpPage() {
                 className="relative inline-block"
               >
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  Join BrandBuddy
+                  Join SwagOnIt
                   <motion.div
                     className="absolute -top-1 -right-1"
                     animate={{ rotate: [0, 15, -15, 0] }}

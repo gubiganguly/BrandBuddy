@@ -103,7 +103,7 @@ export function RoleSelectionPopup({ isOpen, onClose, userId, userName }: RoleSe
                       className="relative inline-block"
                     >
                       <h1 className="text-3xl font-bold text-white mb-2">
-                        Welcome to BrandBuddy!
+                        Welcome to SwagOnIt!
                         <motion.div
                           className="absolute -top-1 -right-1"
                           animate={{ rotate: [0, 15, -15, 0] }}
@@ -201,7 +201,7 @@ export function RoleSelectionPopup({ isOpen, onClose, userId, userName }: RoleSe
                           className="h-5 w-5 border-2 border-blue-950/20 border-t-blue-950 rounded-full"
                         />
                       ) : (
-                        "Continue to BrandBuddy"
+                        "Continue to SwagOnIt"
                       )}
                     </Button>
                   </motion.div>

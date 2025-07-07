@@ -9,7 +9,7 @@ export function Footer() {
           {/* Brand - Full width on all screens */}
           <div className="space-y-2 sm:space-y-3 lg:space-y-4">
             <Link href="/" className="text-xl sm:text-2xl font-bold text-white hover:text-yellow-400 transition-colors">
-              BrandBuddy
+              SwagOnIt
             </Link>
             <p className="text-blue-200 text-sm max-w-xs leading-relaxed">
               Connecting event planners with verified sponsors. Built with ❤️ in Austin 🌮

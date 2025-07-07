@@ -72,7 +72,7 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="text-2xl font-bold text-white hover:text-yellow-400 transition-colors">
-              BrandBuddy
+              SwagOnIt
             </Link>
           </div>
 
